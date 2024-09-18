@@ -58,7 +58,6 @@ jobs:
         cd android-kernel
         repo init --depth 1 -u https://android.googlesource.com/kernel/manifest -b common-android14-5.15-${{ inputs.os_patch_level }}
         repo sync
-        ls -la
 
     - name: Apply patches and configuration files
       if: ${{ inputs.custom == true }}
@@ -78,29 +77,9 @@ jobs:
     - name: Build Kernel
       run: |
         cd $GITHUB_WORKSPACE/android-kernel
-        echo "ls build"
-        ls build
-        echo "ls build/kernel"
-        ls build/kernel
-        cp build/kernel/_setup_env.sh build/_setup_env.sh
-        echo "ls build"
-        ls build
-        echo "cat after cp:"
-        cat build/_setup_env.sh
-        if [ -f build/_setup_env.sh ]; then
-          BUILD_CONFIG=common/build.config.gki.aarch64 build/config.sh savedefconfig
-          LTO=thin BUILD_CONFIG=common/build.config.gki.aarch64 build/build.sh
-        else
-          echo "Error: build/_setup_env.sh not found"
-          ls build
-          echo "ls ."
-          echo "find . | grep setup_env"
-          find . | grep setup_env
-          ls kernel
-          ls prebuilts
-          ls tools
-          exit 1
-        fi
+        echo "ls"
+        ls
+        tools/bazel build //common:kernel_aarch64_dist
 
     - name: Prepare artifacts
       id: prepareArtifacts
