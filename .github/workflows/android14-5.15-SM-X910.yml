@@ -41,7 +41,7 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        sudo apt install repo wget dwarves -y
+        sudo apt install repo wget dwarves build-essential -y
 
     - name: Install latest repo tool
       run: |
@@ -73,7 +73,8 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE
         git clone https://github.com/rvalyi/GKI-Custom.git gki-patch
-        cp ./gki-patch/config/gki_defconfig-android13-5.15 ./android-kernel/common/arch/arm64/configs/gki_defconfig
+        # FIXME FIXME FIXME: inject the LXC settings properly, see the diff I put in config...
+        # cp ./gki-patch/config/gki_defconfig-android13-5.15 ./android-kernel/common/arch/arm64/configs/gki_defconfig
         cd ./android-kernel/common
         git apply $GITHUB_WORKSPACE/gki-patch/patchs/*.patch
 
@@ -94,20 +95,24 @@ jobs:
         head -n 10 common/Makefile
         # BUILD_CONFIG=common/build.config.gki.aarch64 build/config.sh savedefconfig
         # LTO=thin BUILD_CONFIG=common/build.config.gki.aarch64 build/build.sh
-        # BUILD_CONFIG=common/arch/arm64/configs/kalama_gki_defconfig build/config.sh savedefconfig
-        # cd common
-        # echo "will do make mrproper"
-        # make mrproper
-        # cd ..
         export ARCH=arm64
-        #export CROSS_COMPILE=aarch64-linux-android-
         sed -i 's/CONFIG_DEBUG_INFO_BTF=y/CONFIG_DEBUG_INFO_BTF=n/' common/arch/arm64/configs/kalama_gki_defconfig
         sed -i 's/CONFIG_DEBUG_INFO_BTF_MODULES=y/CONFIG_DEBUG_INFO_BTF_MODULES=n/' common/arch/arm64/configs/kalama_gki_defconfig
-        echo "will do savedefconfig"
-        BUILD_CONFIG=common/build.config.gki.aarch64 KERNEL_DEFCONFIG=kalama_gki_defconfig build/config.sh savedefconfig
-        ls -la .
-        echo "build.sh --config done"
-        pahole --version
+        echo "will do build/config.sh"
+        #BUILD_CONFIG=common/build.config.gki.aarch64 build/config.sh savedefconfig
+        BUILD_CONFIG=common/build.config.gki.aarch64 build/config.sh kalama_gki_defconfig
+        # BUILD_CONFIG=common/build.config.gki.aarch64 KERNEL_DEFCONFIG=kalama_gki_defconfig build/config.sh savedefconfig
+        #ls -la .
+        #echo "build.sh --config done"
+        # gcc common/scripts/sign-file.c -o /home/runner/work/GKI-Custom/GKI-Custom/android-kernel/out/android13-5.15/common/scripts/sign-file -lssl -lcrypto
+        # ls -la /home/runner/work/GKI-Custom/GKI-Custom/android-kernel/out/android13-5.15/common/scripts/sign-file
+        #echo "-----------------------------------"
+        sed -i '/build_system_dlkm/i   gcc /home/runner/work/GKI-Custom/GKI-Custom/android-kernel/out/android13-5.15/common/scripts/sign-file.c -o /home/runner/work/GKI-Custom/GKI-Custom/android-kernel/out/android13-5.15/common/scripts/sign-file -lssl -lcrypto' build/build.sh
+        #cat build/build.sh
+        #ls /home/runner/work/GKI-Custom/GKI-Custom/android-kernel/build/
+        #ls build
+        #echo "***********************************"
+        cp build/kernel/gettop.sh build/gettop.sh
         KCFLAGS="-g0 -Wno-error" LTO=thin BUILD_CONFIG=common/build.config.gki.aarch64 build/build.sh -j2
 
     - name: Prepare artifacts
