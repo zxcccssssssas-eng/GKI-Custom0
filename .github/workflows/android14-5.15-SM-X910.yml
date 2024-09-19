@@ -41,7 +41,7 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        sudo apt install repo wget -y
+        sudo apt install repo wget dwarves -y
 
     - name: Install latest repo tool
       run: |
@@ -94,8 +94,21 @@ jobs:
         head -n 10 common/Makefile
         # BUILD_CONFIG=common/build.config.gki.aarch64 build/config.sh savedefconfig
         # LTO=thin BUILD_CONFIG=common/build.config.gki.aarch64 build/build.sh
-        BUILD_CONFIG=common/arch/arm64/configs/kalama_gki_defconfig build/config.sh savedefconfig
-        LTO=thin BUILD_CONFIG=common/arch/arm64/configs/kalama_gki_defconfig build/build.sh
+        # BUILD_CONFIG=common/arch/arm64/configs/kalama_gki_defconfig build/config.sh savedefconfig
+        # cd common
+        # echo "will do make mrproper"
+        # make mrproper
+        # cd ..
+        export ARCH=arm64
+        #export CROSS_COMPILE=aarch64-linux-android-
+        sed -i 's/CONFIG_DEBUG_INFO_BTF=y/CONFIG_DEBUG_INFO_BTF=n/' common/arch/arm64/configs/kalama_gki_defconfig
+        sed -i 's/CONFIG_DEBUG_INFO_BTF_MODULES=y/CONFIG_DEBUG_INFO_BTF_MODULES=n/' common/arch/arm64/configs/kalama_gki_defconfig
+        echo "will do savedefconfig"
+        BUILD_CONFIG=common/build.config.gki.aarch64 KERNEL_DEFCONFIG=kalama_gki_defconfig build/config.sh savedefconfig
+        ls -la .
+        echo "build.sh --config done"
+        pahole --version
+        KCFLAGS="-g0 -Wno-error" LTO=thin BUILD_CONFIG=common/build.config.gki.aarch64 build/build.sh -j2
 
     - name: Prepare artifacts
       id: prepareArtifacts
