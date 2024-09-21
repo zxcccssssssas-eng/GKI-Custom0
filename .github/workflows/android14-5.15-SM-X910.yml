@@ -41,7 +41,7 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        sudo apt install repo wget dwarves build-essential -y
+        sudo apt install repo wget dwarves -y
 
     - name: Install latest repo tool
       run: |
@@ -104,10 +104,14 @@ jobs:
         # BUILD_CONFIG=common/build.config.gki.aarch64 KERNEL_DEFCONFIG=kalama_gki_defconfig build/config.sh savedefconfig
         #ls -la .
         #echo "build.sh --config done"
-        # gcc common/scripts/sign-file.c -o /home/runner/work/GKI-Custom/GKI-Custom/android-kernel/out/android13-5.15/common/scripts/sign-file -lssl -lcrypto
-        # ls -la /home/runner/work/GKI-Custom/GKI-Custom/android-kernel/out/android13-5.15/common/scripts/sign-file
+        gcc common/scripts/sign-file.c -o common/scripts/sign-file -lssl -lcrypto
+        ls -la /home/runner/work/GKI-Custom/GKI-Custom/android-kernel/common/scripts/sign-file
+        cd common
+        openssl req -new -x509 -newkey rsa:4096 -keyout certs/signing_key.pem -out certs/signing_key.x509 -nodes -days 36500 -subj "/CN=Custom Kernel Module Signing/"
+        ls certs
+        cd ..
         #echo "-----------------------------------"
-        sed -i '/build_system_dlkm/i   gcc /home/runner/work/GKI-Custom/GKI-Custom/android-kernel/out/android13-5.15/common/scripts/sign-file.c -o /home/runner/work/GKI-Custom/GKI-Custom/android-kernel/out/android13-5.15/common/scripts/sign-file -lssl -lcrypto' build/build.sh
+        sed -i '/build_system_dlkm/i   cp /home/runner/work/GKI-Custom/GKI-Custom/android-kernel/common/certs/signing_key.pem /home/runner/work/GKI-Custom/GKI-Custom/android-kernel/out/android13-5.15/common/certs/signing_key.pem; cp /home/runner/work/GKI-Custom/GKI-Custom/android-kernel/common/certs/signing_key.x509 /home/runner/work/GKI-Custom/GKI-Custom/android-kernel/out/android13-5.15/common/certs/signing_key.x509; cp /home/runner/work/GKI-Custom/GKI-Custom/android-kernel/common/scripts/sign-file /home/runner/work/GKI-Custom/GKI-Custom/android-kernel/out/android13-5.15/common/scripts/sign-file' build/build.sh
         #cat build/build.sh
         #ls /home/runner/work/GKI-Custom/GKI-Custom/android-kernel/build/
         #ls build
