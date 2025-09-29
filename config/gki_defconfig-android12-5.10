@@ -641,6 +641,7 @@ CONFIG_NLS_KOI8_R=y
 CONFIG_NLS_KOI8_U=y
 CONFIG_NLS_MAC_ROMAN=y
 CONFIG_NLS_MAC_CELTIC=y
+CONFIG_CMDLINE="stack_depot_disable=on kasan.stacktrace=off kvm-arm.mode=nvhe cgroup_disable=pressure cgroup.memory=nokmem noirqdebug"
 CONFIG_NLS_MAC_CENTEURO=y
 CONFIG_NLS_MAC_CROATIAN=y
 CONFIG_NLS_MAC_CYRILLIC=y
